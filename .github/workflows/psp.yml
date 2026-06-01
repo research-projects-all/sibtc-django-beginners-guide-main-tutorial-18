@@ -1,0 +1,42 @@
+name: PSP Pedagogical Security Scan
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  psp:
+    name: Run Pedagogical SAST Profile
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Confirm Python files exist
+        run: |
+          echo "Repository root:"
+          pwd
+
+          echo "Python files found:"
+          find . -name "*.py" \
+            -not -path "./.venv/*" \
+            -not -path "./venv/*" \
+            -not -path "./env/*" \
+            -not -path "./__pycache__/*" \
+            | sort
+
+      - name: Pedagogical SAST Profile PSP
+        uses: research-projects-all/Pedagogical-SAST-Profile-PSP@v2.0.0
+        with:
+          framework: django
+          scan-path: .
+          output-format: sarif
+          output-file: psp-results.sarif
+          fail-on-finding: false
